@@ -47,6 +47,10 @@ const getFileExtension = (filename: string) => {
     return filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
 }
 
+const GITHUB_UPLOAD_URL = "https://giit-upload.onrender.com/upload";
+const R2_UPLOAD_URL = "https://cloud-flare-r2-uploader.onrender.com";
+
+
 export function CreateForm({ storageProvider }: { storageProvider: StorageProvider }) {
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -86,6 +90,7 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
 
       let mediaUrl = "";
       let audioUrl = "";
+      let srtContent = "";
 
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       if (storageProvider === "firebase") {
@@ -101,7 +106,9 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
           await uploadBytes(fileRef, audioFile);
           audioUrl = await getDownloadURL(fileRef);
         }
-      } else { // custom backend
+      } else { // github or r2
+        const uploadUrl = storageProvider === 'github' ? GITHUB_UPLOAD_URL : R2_UPLOAD_URL;
+        
         const formData = new FormData();
         formData.append('folder', uniqueId);
 
@@ -117,7 +124,7 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
         }
 
         if (mediaFile || audioFile) {
-            const response = await fetch('https://giit-upload.onrender.com/upload', {
+            const response = await fetch(uploadUrl, {
                 method: 'POST',
                 body: formData
             });
@@ -133,7 +140,6 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
         }
       }
 
-      let srtContent = "";
       if (srtFile) {
         srtContent = await readFileAsText(srtFile);
         srtContent = srtContent.replace(/Transcribed by TurboScribe\.ai\. Go Unlimited to remove this message/g, "made by SayWith");
@@ -144,6 +150,7 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
         mediaUrl,
         audioUrl,
         srtContent,
+        storageProvider,
       });
       
       setShowSuccessDialog(true);

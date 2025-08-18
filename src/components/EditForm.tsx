@@ -39,6 +39,7 @@ interface DbData extends FormData {
     template: string;
     enabled: boolean;
     mute: boolean;
+    storageProvider: StorageProvider;
 }
 
 const readFileAsText = (file: File): Promise<string> => {
@@ -54,7 +55,10 @@ const getFileExtension = (filename: string) => {
     return filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
 }
 
-export function EditForm({ storageProvider }: { storageProvider: StorageProvider }) {
+const GITHUB_UPLOAD_URL = "https://giit-upload.onrender.com/upload";
+const R2_UPLOAD_URL = "https://cloud-flare-r2-uploader.onrender.com";
+
+export function EditForm() {
   const [id, setId] = useState("");
   const [loadedData, setLoadedData] = useState<DbData | null>(null);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
@@ -125,8 +129,11 @@ export function EditForm({ storageProvider }: { storageProvider: StorageProvider
         if (dirtyFields.template && values.template) updates.template = values.template;
         if (dirtyFields.enabled !== undefined) updates.enabled = values.enabled;
         if (dirtyFields.mute !== undefined) updates.mute = values.mute;
-const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        if (storageProvider === 'firebase') {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        
+        const currentStorageProvider = loadedData.storageProvider || 'firebase';
+
+        if (currentStorageProvider === 'firebase') {
           if (mediaFile) {
               const mediaExtension = getFileExtension(mediaFile.name);
               const fileRef = storageRef(storage, `messages/${id}/media_${timestamp}.${mediaExtension}`);
@@ -140,7 +147,9 @@ const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
               await uploadBytes(fileRef, audioFile);
               updates.audioUrl = await getDownloadURL(fileRef);
           }
-        } else { // custom backend
+        } else { // github or r2
+            const uploadUrl = currentStorageProvider === 'github' ? GITHUB_UPLOAD_URL : R2_UPLOAD_URL;
+
             const formData = new FormData();
             formData.append('folder', id);
             if (mediaFile) {
@@ -155,7 +164,7 @@ const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             }
 
             if (mediaFile || audioFile) {
-                const response = await fetch('https://giit-upload.onrender.com/upload', {
+                const response = await fetch(uploadUrl, {
                     method: 'POST',
                     body: formData
                 });
@@ -322,5 +331,3 @@ const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     </Card>
   );
 }
-
-    

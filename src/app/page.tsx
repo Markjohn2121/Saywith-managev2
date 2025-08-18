@@ -7,7 +7,7 @@ import { CreateForm } from "@/components/CreateForm";
 import { EditForm } from "@/components/EditForm";
 import { SayWithLogo } from "@/components/SayWithLogo";
 import { LockScreen } from "@/components/LockScreen";
-import { FilePlus2, Edit, Settings, Server, Database } from "lucide-react";
+import { FilePlus2, Edit, Settings, Server, Database, Cloud } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button';
 
-export type StorageProvider = "firebase" | "custom";
+export type StorageProvider = "firebase" | "github" | "r2";
 
 export default function Home() {
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -38,13 +38,13 @@ export default function Home() {
     }
 
     const savedProvider = localStorage.getItem("storageProvider") as StorageProvider;
-    if (savedProvider) {
+    if (savedProvider && ["firebase", "github", "r2"].includes(savedProvider)) {
       setStorageProvider(savedProvider);
     }
   }, []);
 
   const handleProviderChange = (provider: string) => {
-    if (provider === "firebase" || provider === "custom") {
+    if (provider === "firebase" || provider === "github" || provider === "r2") {
         const newProvider = provider as StorageProvider;
         setStorageProvider(newProvider);
         localStorage.setItem("storageProvider", newProvider);
@@ -79,9 +79,13 @@ export default function Home() {
                       <Database className="mr-2 h-4 w-4" />
                       <span>Firebase Storage</span>
                     </DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="custom">
+                    <DropdownMenuRadioItem value="github">
                       <Server className="mr-2 h-4 w-4" />
-                      <span>Custom Backend</span>
+                      <span>GitHub Storage</span>
+                    </DropdownMenuRadioItem>
+                     <DropdownMenuRadioItem value="r2">
+                      <Cloud className="mr-2 h-4 w-4" />
+                      <span>R2 Storage</span>
                     </DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
@@ -104,7 +108,7 @@ export default function Home() {
             <CreateForm storageProvider={storageProvider} />
           </TabsContent>
           <TabsContent value="edit" className="mt-6">
-            <EditForm storageProvider={storageProvider} />
+            <EditForm />
           </TabsContent>
         </Tabs>
       </main>
