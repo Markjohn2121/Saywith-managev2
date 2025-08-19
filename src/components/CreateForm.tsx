@@ -47,8 +47,8 @@ const getFileExtension = (filename: string) => {
     return filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
 }
 
-const GITHUB_UPLOAD_URL = "https://giit-upload.onrender.com/upload";
-const R2_UPLOAD_URL = "https://cloud-flare-r2-uploader.onrender.com";
+const GITHUB_UPLOAD_URL = 'https://giit-upload.onrender.com/upload';
+const R2_UPLOAD_URL = 'https://cloud-flare-r2-uploader.onrender.com/upload';
 
 
 export function CreateForm({ storageProvider }: { storageProvider: StorageProvider }) {
@@ -124,7 +124,7 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
         }
 
         if (mediaFile || audioFile) {
-            const response = await fetch("https://giit-upload.onrender.com/upload", {
+            const response = await fetch(uploadUrl, {
                 method: 'POST',
                 body: formData
             });
