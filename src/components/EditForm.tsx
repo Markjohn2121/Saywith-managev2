@@ -40,6 +40,12 @@ interface DbData extends FormData {
     enabled: boolean;
     mute: boolean;
     storageProvider: StorageProvider;
+    R2mediaPath?: string;
+    R2audioPath?: string;
+    R2mediaEXP?: string;
+    R2audioEXP?: string;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 const readFileAsText = (file: File): Promise<string> => {
@@ -56,7 +62,7 @@ const getFileExtension = (filename: string) => {
 }
 
 const GITHUB_UPLOAD_URL = "https://giit-upload.onrender.com/upload";
-const R2_UPLOAD_URL = "https://cloud-flare-r2-uploader.onrender.com";
+const R2_UPLOAD_URL = "https://cloud-flare-r2-uploader.onrender.com/upload";
 
 export function EditForm() {
   const [id, setId] = useState("");
@@ -177,6 +183,11 @@ export function EditForm() {
                 const responseData = await response.json();
                 if (responseData.file1URL) updates.mediaUrl = responseData.file1URL;
                 if (responseData.file2URL) updates.audioUrl = responseData.file2URL;
+                
+                if (responseData.R2mediaPath) updates.R2mediaPath = responseData.R2mediaPath;
+                if (responseData.R2audioPath) updates.R2audioPath = responseData.R2audioPath;
+                if (responseData.R2mediaEXP) updates.R2mediaEXP = responseData.R2mediaEXP;
+                if (responseData.R2audioEXP) updates.R2audioEXP = responseData.R2audioEXP;
             }
         }
         
@@ -189,6 +200,7 @@ export function EditForm() {
         if(finalSrtContent !== loadedData.srtContent) updates.srtContent = finalSrtContent;
         
         if (Object.keys(updates).length > 0) {
+            updates.updatedAt = new Date().toISOString();
             await update(dbRef(db, `Saywith/${id}`), updates);
             toast({ title: "✅ Update Successful!", description: "Your content has been updated successfully.", className: "bg-green-500 text-white border-green-600" });
             setLoadedData(prev => prev ? {...prev, ...updates} : null);

@@ -91,6 +91,9 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
       let mediaUrl = "";
       let audioUrl = "";
       let srtContent = "";
+      const r2Data: any = {};
+      const now = new Date().toISOString();
+
 
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       if (storageProvider === "firebase") {
@@ -137,6 +140,11 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
             const responseData = await response.json();
             if (responseData.file1URL) mediaUrl = responseData.file1URL;
             if (responseData.file2URL) audioUrl = responseData.file2URL;
+            
+            if (responseData.R2mediaPath) r2Data.R2mediaPath = responseData.R2mediaPath;
+            if (responseData.R2audioPath) r2Data.R2audioPath = responseData.R2audioPath;
+            if (responseData.R2mediaEXP) r2Data.R2mediaEXP = responseData.R2mediaEXP;
+            if (responseData.R2audioEXP) r2Data.R2audioEXP = responseData.R2audioEXP;
         }
       }
 
@@ -151,6 +159,9 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
         audioUrl,
         srtContent,
         storageProvider,
+        ...r2Data,
+        createdAt: now,
+        updatedAt: now,
       });
       
       setShowSuccessDialog(true);
