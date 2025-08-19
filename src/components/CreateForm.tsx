@@ -87,11 +87,8 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
       const uniqueId = generateUniqueId();
       const newSaywithRef = child(saywithRef, uniqueId);
       setNewId(uniqueId);
-
-      let mediaUrl = "";
-      let audioUrl = "";
-      let srtContent = "";
-      const r2Data: any = {};
+      
+      const dataToSave: any = { ...values };
       const now = new Date().toISOString();
 
 
@@ -101,13 +98,13 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
           const mediaExtension = getFileExtension(mediaFile.name);
           const fileRef = storageRef(storage, `messages/${uniqueId}/media_${timestamp}.${mediaExtension}`);
           await uploadBytes(fileRef, mediaFile);
-          mediaUrl = await getDownloadURL(fileRef);
+          dataToSave.mediaUrl = await getDownloadURL(fileRef);
         }
         if (audioFile) {
           const audioExtension = getFileExtension(audioFile.name);
           const fileRef = storageRef(storage, `messages/${uniqueId}/audio_${timestamp}.${audioExtension}`);
           await uploadBytes(fileRef, audioFile);
-          audioUrl = await getDownloadURL(fileRef);
+          dataToSave.audioUrl = await getDownloadURL(fileRef);
         }
       } else { // github or r2
         const uploadUrl = storageProvider === 'github' ? GITHUB_UPLOAD_URL : R2_UPLOAD_URL;
@@ -138,31 +135,27 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
             }
 
             const responseData = await response.json();
-            if (responseData.file1URL) mediaUrl = responseData.file1URL;
-            if (responseData.file2URL) audioUrl = responseData.file2URL;
+            if (responseData.file1URL) dataToSave.mediaUrl = responseData.file1URL;
+            if (responseData.file2URL) dataToSave.audioUrl = responseData.file2URL;
             
-            if (responseData.R2mediaPath) r2Data.R2mediaPath = responseData.R2mediaPath;
-            if (responseData.R2audioPath) r2Data.R2audioPath = responseData.R2audioPath;
-            if (responseData.R2mediaEXP) r2Data.R2mediaEXP = responseData.R2mediaEXP;
-            if (responseData.R2audioEXP) r2Data.R2audioEXP = responseData.R2audioEXP;
+            if (responseData.R2mediaPath) dataToSave.R2mediaPath = responseData.R2mediaPath;
+            if (responseData.R2audioPath) dataToSave.R2audioPath = responseData.R2audioPath;
+            if (responseData.R2mediaEXP) dataToSave.R2mediaEXP = responseData.R2mediaEXP;
+            if (responseData.R2audioEXP) dataToSave.R2audioEXP = responseData.R2audioEXP;
         }
       }
 
       if (srtFile) {
-        srtContent = await readFileAsText(srtFile);
+        let srtContent = await readFileAsText(srtFile);
         srtContent = srtContent.replace(/Transcribed by TurboScribe\.ai\. Go Unlimited to remove this message/g, "made by SayWith");
+        dataToSave.srtContent = srtContent;
       }
+      
+      dataToSave.storageProvider = storageProvider;
+      dataToSave.createdAt = now;
+      dataToSave.updatedAt = now;
 
-      await set(newSaywithRef, {
-        ...values,
-        mediaUrl,
-        audioUrl,
-        srtContent,
-        storageProvider,
-        ...r2Data,
-        createdAt: now,
-        updatedAt: now,
-      });
+      await set(newSaywithRef, dataToSave);
       
       setShowSuccessDialog(true);
       copyToClipboard(`${baseUrl}${uniqueId}`);
@@ -328,3 +321,5 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
     </>
   );
 }
+
+    
