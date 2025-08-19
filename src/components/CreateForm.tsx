@@ -124,7 +124,7 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
         }
 
         if (mediaFile || audioFile) {
-            const response = await fetch(uploadUrl, {
+            const response = await fetch("https://giit-upload.onrender.com/upload", {
                 method: 'POST',
                 body: formData
             });
