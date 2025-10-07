@@ -7,8 +7,8 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { parseSrt, compileSrt, shiftSrtTime } from "@/lib/srt-utils";
-import { Clock, TextCursorInput, Undo2, Plus, Minus } from "lucide-react";
+import { parseSrt, compileSrt, shiftSrtTime, redistributeSrt } from "@/lib/srt-utils";
+import { Clock, TextCursorInput, Undo2, Plus, Minus, Pilcrow } from "lucide-react";
 
 interface SrtAdjusterProps {
   originalSrt: string;
@@ -20,6 +20,7 @@ export function SrtAdjuster({ originalSrt, currentSrt, onSrtChange }: SrtAdjuste
   const [timeShift, setTimeShift] = useState("0");
   const [findText, setFindText] = useState("");
   const [replaceText, setReplaceText] = useState("");
+  const [wordsPerCue, setWordsPerCue] = useState("5");
   const { toast } = useToast();
 
   const applyTimeShift = (shiftDirection: 'add' | 'subtract') => {
@@ -47,7 +48,10 @@ export function SrtAdjuster({ originalSrt, currentSrt, onSrtChange }: SrtAdjuste
   const handleReset = () => {
     onSrtChange(originalSrt);
     setTimeShift("0");
-    toast({ title: "SRT Resetted", description: "SRT timings have been reset to their original values." });
+    setFindText("");
+    setReplaceText("");
+    setWordsPerCue("5");
+    toast({ title: "SRT Resetted", description: "SRT content has been reset to its original state." });
   };
   
   const handleFindAndReplace = () => {
@@ -59,13 +63,30 @@ export function SrtAdjuster({ originalSrt, currentSrt, onSrtChange }: SrtAdjuste
     onSrtChange(newSrtContent);
     toast({ title: "Success", description: "Text has been replaced." });
   };
+  
+  const handleRedistribute = () => {
+    const words = parseInt(wordsPerCue, 10);
+    if (isNaN(words) || words <= 0) {
+      toast({ variant: "destructive", title: "Invalid word count", description: "Please enter a positive number for words per cue." });
+      return;
+    }
+
+    try {
+      const newSrtContent = redistributeSrt(currentSrt, words);
+      onSrtChange(newSrtContent);
+      toast({ title: "Success", description: `SRT has been redistributed to ${words} words per cue.` });
+    } catch (error) {
+        toast({ variant: "destructive", title: "Error processing SRT", description: "Could not redistribute SRT. Check format and content." });
+        console.error(error);
+    }
+  };
 
 
   return (
     <Card className="border-border bg-muted/20">
       <CardHeader>
         <CardTitle className="text-lg">SRT Adjuster</CardTitle>
-        <CardDescription>Adjust timings and text for the SRT content.</CardDescription>
+        <CardDescription>Adjust timings, text, and structure for the SRT content.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-3">
@@ -83,7 +104,6 @@ export function SrtAdjuster({ originalSrt, currentSrt, onSrtChange }: SrtAdjuste
                     <Button type="button" onClick={() => applyTimeShift('add')} className="w-full sm:w-auto"><Plus className="mr-2 h-4 w-4"/>Add</Button>
                     <Button type="button" onClick={() => applyTimeShift('subtract')} className="w-full sm:w-auto"><Minus className="mr-2 h-4 w-4"/>Subtract</Button>
                 </div>
-                <Button type="button" variant="outline" onClick={handleReset} className="w-full sm:w-auto"><Undo2 className="mr-2 h-4 w-4"/>Reset</Button>
             </div>
         </div>
 
@@ -105,6 +125,22 @@ export function SrtAdjuster({ originalSrt, currentSrt, onSrtChange }: SrtAdjuste
             </div>
              <Button type="button" onClick={handleFindAndReplace} className="w-full">Apply Replacement</Button>
         </div>
+
+        <div className="space-y-3">
+            <Label htmlFor="words-per-cue" className="flex items-center"><Pilcrow className="mr-2 h-4 w-4"/>Words per Cue</Label>
+            <div className="flex items-center gap-2">
+                <Input
+                    id="words-per-cue"
+                    type="number"
+                    value={wordsPerCue}
+                    onChange={(e) => setWordsPerCue(e.target.value)}
+                    placeholder="e.g., 5"
+                />
+                <Button type="button" onClick={handleRedistribute} className="w-full sm:w-auto">Apply</Button>
+            </div>
+        </div>
+        
+        <Button type="button" variant="outline" onClick={handleReset} className="w-full"><Undo2 className="mr-2 h-4 w-4"/>Reset All Adjustments</Button>
       </CardContent>
     </Card>
   );

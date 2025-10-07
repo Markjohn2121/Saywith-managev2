@@ -34,14 +34,28 @@ export const parseSrt = (srtContent: string): SrtCue[] => {
 
   for (const block of blocks) {
     const lines = block.trim().split('\n');
-    if (lines.length >= 3) {
-      const index = parseInt(lines[0], 10);
-      const timeMatch = lines[1].match(/(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})/);
+    if (lines.length >= 2) {
+      // Allow blocks with just time and text, index is optional
+      let index, timeLineIndex;
+      const potentialIndex = parseInt(lines[0], 10);
+      const isIndexNumeric = !isNaN(potentialIndex) && !lines[0].includes('-->');
+      
+      if(isIndexNumeric) {
+        index = potentialIndex;
+        timeLineIndex = 1;
+      } else {
+        index = cues.length + 1;
+        timeLineIndex = 0;
+      }
+
+      if(lines.length < timeLineIndex + 1) continue;
+
+      const timeMatch = lines[timeLineIndex].match(/(\d{1,2}:\d{2}:\d{2}[,.]\d{1,3}) --> (\d{1,2}:\d{2}:\d{2}[,.]\d{1,3})/);
       
       if (timeMatch) {
-        const start = timeToSeconds(timeMatch[1]);
-        const end = timeToSeconds(timeMatch[2]);
-        const text = lines.slice(2).join('\n');
+        const start = timeToSeconds(timeMatch[1].replace('.',','));
+        const end = timeToSeconds(timeMatch[2].replace('.',','));
+        const text = lines.slice(timeLineIndex + 1).join('\n');
         
         cues.push({ index, start, end, text });
       }
@@ -51,10 +65,10 @@ export const parseSrt = (srtContent: string): SrtCue[] => {
 };
 
 export const compileSrt = (cues: SrtCue[]): string => {
-  return cues.map(cue => {
+  return cues.map((cue, i) => {
     const start = secondsToTime(cue.start);
     const end = secondsToTime(cue.end);
-    return `${cue.index}\n${start} --> ${end}\n${cue.text}`;
+    return `${i + 1}\n${start} --> ${end}\n${cue.text}`;
   }).join('\n\n');
 };
 
@@ -64,4 +78,40 @@ export const shiftSrtTime = (cue: SrtCue, shiftInSeconds: number): SrtCue => {
         start: cue.start + shiftInSeconds,
         end: cue.end + shiftInSeconds,
     };
+};
+
+export const redistributeSrt = (srtContent: string, wordsPerCue: number): string => {
+  const originalCues = parseSrt(srtContent);
+  if (originalCues.length === 0) return srtContent;
+
+  const fullText = originalCues.map(cue => cue.text).join(' ').replace(/\s+/g, ' ').trim();
+  const allWords = fullText.split(' ');
+  
+  const totalDuration = originalCues[originalCues.length - 1].end - originalCues[0].start;
+  const timePerWord = allWords.length > 0 ? totalDuration / allWords.length : 0;
+
+  const newCues: SrtCue[] = [];
+  let currentTime = originalCues[0].start;
+
+  for (let i = 0; i < allWords.length; i += wordsPerCue) {
+    const chunk = allWords.slice(i, i + wordsPerCue);
+    if (chunk.length === 0) continue;
+
+    const chunkText = chunk.join(' ');
+    const chunkDuration = chunk.length * timePerWord;
+    
+    const startTime = currentTime;
+    const endTime = currentTime + chunkDuration;
+
+    newCues.push({
+      index: newCues.length + 1,
+      start: startTime,
+      end: endTime,
+      text: chunkText,
+    });
+
+    currentTime = endTime;
+  }
+
+  return compileSrt(newCues);
 };
