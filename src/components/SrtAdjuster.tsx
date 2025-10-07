@@ -23,7 +23,7 @@ export function SrtAdjuster({ originalSrt, currentSrt, onSrtChange }: SrtAdjuste
   const { toast } = useToast();
 
   const handleTimeShift = () => {
-    const shiftInMs = parseInt(timeShift, 10);
+    const shiftInMs = parseFloat(timeShift);
     if (isNaN(shiftInMs)) {
       toast({ variant: "destructive", title: "Invalid time shift", description: "Please enter a valid number for milliseconds." });
       return;
