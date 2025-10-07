@@ -55,6 +55,7 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [srtFile, setSrtFile] = useState<File | null>(null);
+  const [manualTemplate, setManualTemplate] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [newId, setNewId] = useState("");
@@ -89,6 +90,7 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
       setNewId(uniqueId);
       
       const dataToSave: any = { ...values };
+      dataToSave.template = manualTemplate || values.template;
       const now = new Date().toISOString();
 
 
@@ -137,7 +139,6 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
             const responseData = await response.json();
             if (responseData.file1URL) dataToSave.mediaUrl = responseData.file1URL;
             if (responseData.file2URL) dataToSave.audioUrl = responseData.file2URL;
-            
             if (responseData.R2mediaPath) dataToSave.R2mediaPath = responseData.R2mediaPath;
             if (responseData.R2audioPath) dataToSave.R2audioPath = responseData.R2audioPath;
             if (responseData.R2mediaEXP) dataToSave.R2mediaEXP = responseData.R2mediaEXP;
@@ -160,6 +161,7 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
       setShowSuccessDialog(true);
       copyToClipboard(`${baseUrl}${uniqueId}`);
       form.reset({ name: "", template: "", enabled: false, mute: false });
+      setManualTemplate("");
       setMediaFile(null);
       setAudioFile(null);
       setSrtFile(null);
@@ -213,30 +215,44 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="template"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Template</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a template" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {templates.map(template => (
-                          <SelectItem key={template.value} value={template.value}>
-                            {template.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-2">
+                <FormField
+                  control={form.control}
+                  name="template"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Template</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a template" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {templates.map(template => (
+                            <SelectItem key={template.value} value={template.value}>
+                              {template.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormItem>
+                  <FormLabel>Manual Template (Optional)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Or enter a template value manually" 
+                      value={manualTemplate}
+                      onChange={(e) => setManualTemplate(e.target.value)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </div>
+
 
               <div className="space-y-4">
                   <FileUploader id="media-file" label="Media File (Image/Video)" accept="image/*,video/*" file={mediaFile} onFileSelect={setMediaFile} />

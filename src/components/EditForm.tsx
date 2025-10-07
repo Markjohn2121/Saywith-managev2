@@ -71,6 +71,7 @@ export function EditForm() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [srtFile, setSrtFile] = useState<File | null>(null);
   const [srtContent, setSrtContent] = useState("");
+  const [manualTemplate, setManualTemplate] = useState("");
   const [isFetching, setIsFetching] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
@@ -89,9 +90,11 @@ export function EditForm() {
         mute: loadedData.mute,
       });
       setSrtContent(loadedData.srtContent);
+      setManualTemplate(loadedData.template || "");
     } else {
         form.reset({ name: "", template: "", enabled: false, mute: false });
         setSrtContent("");
+        setManualTemplate("");
     }
   }, [loadedData, form]);
 
@@ -130,11 +133,13 @@ export function EditForm() {
         const updates: any = {};
         
         const dirtyFields = form.formState.dirtyFields;
+        const finalTemplate = manualTemplate || values.template;
 
-        if (dirtyFields.name && values.name) updates.name = values.name;
-        if (dirtyFields.template && values.template) updates.template = values.template;
+        if (dirtyFields.name) updates.name = values.name;
+        if (finalTemplate !== loadedData.template) updates.template = finalTemplate;
         if (dirtyFields.enabled !== undefined) updates.enabled = values.enabled;
         if (dirtyFields.mute !== undefined) updates.mute = values.mute;
+
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         
         const currentStorageProvider = loadedData.storageProvider || 'firebase';
@@ -183,7 +188,6 @@ export function EditForm() {
                 const responseData = await response.json();
                 if (responseData.file1URL) updates.mediaUrl = responseData.file1URL;
                 if (responseData.file2URL) updates.audioUrl = responseData.file2URL;
-                
                 if (responseData.R2mediaPath) updates.R2mediaPath = responseData.R2mediaPath;
                 if (responseData.R2audioPath) updates.R2audioPath = responseData.R2audioPath;
                 if (responseData.R2mediaEXP) updates.R2mediaEXP = responseData.R2mediaEXP;
@@ -254,30 +258,44 @@ export function EditForm() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="template"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Template</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a template" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {templates.map(template => (
-                            <SelectItem key={template.value} value={template.value}>
-                              {template.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                
+                <div className="space-y-2">
+                  <FormField
+                    control={form.control}
+                    name="template"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Template</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a template" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {templates.map(template => (
+                              <SelectItem key={template.value} value={template.value}>
+                                {template.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormItem>
+                    <FormLabel>Manual Template (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Or enter a template value manually" 
+                        value={manualTemplate}
+                        onChange={(e) => setManualTemplate(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                </div>
                 
                 <div className="space-y-4">
                   <FileUploader id="edit-media-file" label="Replace Media File" accept="image/*,video/*" file={mediaFile} onFileSelect={setMediaFile} />
