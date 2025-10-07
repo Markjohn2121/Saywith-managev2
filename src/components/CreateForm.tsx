@@ -150,6 +150,8 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
         let srtContent = await readFileAsText(srtFile);
         srtContent = srtContent.replace(/Transcribed by TurboScribe\.ai\. Go Unlimited to remove this message/g, "made by SayWith");
         dataToSave.srtContent = srtContent;
+      } else {
+        dataToSave.srtContent = "1\n00:00:00,000 --> 00:00:05,000\nSayWith";
       }
       
       dataToSave.storageProvider = storageProvider;

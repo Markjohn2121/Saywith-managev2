@@ -212,13 +212,19 @@ export function EditForm() {
             }
         }
         
-
         let finalSrtContent = srtContent;
         if (srtFile) {
             finalSrtContent = await readFileAsText(srtFile);
         }
+
+        if (finalSrtContent.trim() === "") {
+          finalSrtContent = "1\n00:00:00,000 --> 00:00:05,000\nSayWith";
+        }
+
         finalSrtContent = finalSrtContent.replace(/Transcribed by TurboScribe\.ai\. Go Unlimited to remove this message/g, "made by SayWith");
-        if(finalSrtContent !== loadedData.srtContent) updates.srtContent = finalSrtContent;
+        if(finalSrtContent !== loadedData.srtContent) {
+          updates.srtContent = finalSrtContent;
+        }
         
         if (Object.keys(updates).length > 0) {
             updates.updatedAt = new Date().toISOString();
