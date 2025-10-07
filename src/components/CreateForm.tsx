@@ -91,6 +91,8 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
       
       const dataToSave: any = { ...values };
       dataToSave.template = manualTemplate || values.template;
+      dataToSave.audioUrl = '/default-audio.mp3';
+
       const now = new Date().toISOString();
 
 
