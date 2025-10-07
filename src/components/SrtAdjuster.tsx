@@ -8,7 +8,7 @@ import { Label } from "./ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { parseSrt, compileSrt, shiftSrtTime } from "@/lib/srt-utils";
-import { Clock, TextCursorInput, Undo2 } from "lucide-react";
+import { Clock, TextCursorInput, Undo2, Plus, Minus } from "lucide-react";
 
 interface SrtAdjusterProps {
   originalSrt: string;
@@ -22,21 +22,22 @@ export function SrtAdjuster({ originalSrt, currentSrt, onSrtChange }: SrtAdjuste
   const [replaceText, setReplaceText] = useState("");
   const { toast } = useToast();
 
-  const handleTimeShift = () => {
-    const shiftInMs = parseFloat(timeShift);
+  const applyTimeShift = (shiftDirection: 'add' | 'subtract') => {
+    const shiftInMs = Math.abs(parseFloat(timeShift));
     if (isNaN(shiftInMs)) {
       toast({ variant: "destructive", title: "Invalid time shift", description: "Please enter a valid number for milliseconds." });
       return;
     }
-    
-    const shiftInSeconds = shiftInMs / 1000;
+
+    const shiftInSeconds = shiftDirection === 'add' ? shiftInMs / 1000 : -shiftInMs / 1000;
+    const directionText = shiftDirection === 'add' ? 'Added' : 'Subtracted';
 
     try {
       const parsedSrt = parseSrt(currentSrt);
       const shiftedSrt = parsedSrt.map(cue => shiftSrtTime(cue, shiftInSeconds));
       const newSrtContent = compileSrt(shiftedSrt);
       onSrtChange(newSrtContent);
-      toast({ title: "Success", description: `SRT time shifted by ${shiftInMs} milliseconds.` });
+      toast({ title: "Success", description: `${directionText} ${shiftInMs} milliseconds.` });
     } catch (error) {
       toast({ variant: "destructive", title: "Error processing SRT", description: "Please check the SRT format." });
       console.error(error);
@@ -69,16 +70,20 @@ export function SrtAdjuster({ originalSrt, currentSrt, onSrtChange }: SrtAdjuste
       <CardContent className="space-y-6">
         <div className="space-y-3">
             <Label htmlFor="time-shift" className="flex items-center"><Clock className="mr-2 h-4 w-4"/>Time Shift (milliseconds)</Label>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <Input
                     id="time-shift"
                     type="number"
                     value={timeShift}
                     onChange={(e) => setTimeShift(e.target.value)}
-                    placeholder="e.g., 500 or -200"
+                    placeholder="e.g., 500"
+                    className="flex-grow"
                 />
-                <Button type="button" onClick={handleTimeShift}>Apply</Button>
-                <Button type="button" variant="outline" onClick={handleReset}><Undo2 className="mr-2 h-4 w-4"/>Reset</Button>
+                <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
+                    <Button type="button" onClick={() => applyTimeShift('add')} className="w-full sm:w-auto"><Plus className="mr-2 h-4 w-4"/>Add</Button>
+                    <Button type="button" onClick={() => applyTimeShift('subtract')} className="w-full sm:w-auto"><Minus className="mr-2 h-4 w-4"/>Subtract</Button>
+                </div>
+                <Button type="button" variant="outline" onClick={handleReset} className="w-full sm:w-auto"><Undo2 className="mr-2 h-4 w-4"/>Reset</Button>
             </div>
         </div>
 
