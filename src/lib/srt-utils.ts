@@ -80,38 +80,39 @@ export const shiftSrtTime = (cue: SrtCue, shiftInSeconds: number): SrtCue => {
     };
 };
 
-export const redistributeSrt = (srtContent: string, wordsPerCue: number): string => {
+export const redistributeSrt = (srtContent: string, maxWordsPerCue: number): string => {
   const originalCues = parseSrt(srtContent);
   if (originalCues.length === 0) return srtContent;
 
-  const fullText = originalCues.map(cue => cue.text).join(' ').replace(/\s+/g, ' ').trim();
-  const allWords = fullText.split(' ');
-  
-  const totalDuration = originalCues[originalCues.length - 1].end - originalCues[0].start;
-  const timePerWord = allWords.length > 0 ? totalDuration / allWords.length : 0;
-
   const newCues: SrtCue[] = [];
-  let currentTime = originalCues[0].start;
 
-  for (let i = 0; i < allWords.length; i += wordsPerCue) {
-    const chunk = allWords.slice(i, i + wordsPerCue);
-    if (chunk.length === 0) continue;
+  originalCues.forEach(cue => {
+    const words = cue.text.split(/\s+/).filter(Boolean);
+    if (words.length <= maxWordsPerCue) {
+      newCues.push(cue);
+    } else {
+      const cueDuration = cue.end - cue.start;
+      const timePerWord = cueDuration / words.length;
+      let currentWordIndex = 0;
+      let cueStartTime = cue.start;
 
-    const chunkText = chunk.join(' ');
-    const chunkDuration = chunk.length * timePerWord;
-    
-    const startTime = currentTime;
-    const endTime = currentTime + chunkDuration;
+      while (currentWordIndex < words.length) {
+        const chunk = words.slice(currentWordIndex, currentWordIndex + maxWordsPerCue);
+        const chunkText = chunk.join(' ');
+        const chunkDuration = chunk.length * timePerWord;
+        
+        newCues.push({
+          index: newCues.length + 1,
+          start: cueStartTime,
+          end: cueStartTime + chunkDuration,
+          text: chunkText,
+        });
 
-    newCues.push({
-      index: newCues.length + 1,
-      start: startTime,
-      end: endTime,
-      text: chunkText,
-    });
-
-    currentTime = endTime;
-  }
+        cueStartTime += chunkDuration;
+        currentWordIndex += maxWordsPerCue;
+      }
+    }
+  });
 
   return compileSrt(newCues);
 };

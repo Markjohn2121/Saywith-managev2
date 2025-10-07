@@ -74,7 +74,7 @@ export function SrtAdjuster({ originalSrt, currentSrt, onSrtChange }: SrtAdjuste
     try {
       const newSrtContent = redistributeSrt(currentSrt, words);
       onSrtChange(newSrtContent);
-      toast({ title: "Success", description: `SRT has been redistributed to ${words} words per cue.` });
+      toast({ title: "Success", description: `SRT has been redistributed to a max of ${words} words per cue.` });
     } catch (error) {
         toast({ variant: "destructive", title: "Error processing SRT", description: "Could not redistribute SRT. Check format and content." });
         console.error(error);
@@ -127,7 +127,7 @@ export function SrtAdjuster({ originalSrt, currentSrt, onSrtChange }: SrtAdjuste
         </div>
 
         <div className="space-y-3">
-            <Label htmlFor="words-per-cue" className="flex items-center"><Pilcrow className="mr-2 h-4 w-4"/>Words per Cue</Label>
+            <Label htmlFor="words-per-cue" className="flex items-center"><Pilcrow className="mr-2 h-4 w-4"/>Max Words per Cue</Label>
             <div className="flex items-center gap-2">
                 <Input
                     id="words-per-cue"
