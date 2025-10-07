@@ -23,17 +23,20 @@ export function SrtAdjuster({ originalSrt, currentSrt, onSrtChange }: SrtAdjuste
   const { toast } = useToast();
 
   const handleTimeShift = () => {
-    const shift = parseFloat(timeShift);
-    if (isNaN(shift)) {
-      toast({ variant: "destructive", title: "Invalid time shift", description: "Please enter a valid number." });
+    const shiftInMs = parseInt(timeShift, 10);
+    if (isNaN(shiftInMs)) {
+      toast({ variant: "destructive", title: "Invalid time shift", description: "Please enter a valid number for milliseconds." });
       return;
     }
+    
+    const shiftInSeconds = shiftInMs / 1000;
+
     try {
       const parsedSrt = parseSrt(currentSrt);
-      const shiftedSrt = parsedSrt.map(cue => shiftSrtTime(cue, shift));
+      const shiftedSrt = parsedSrt.map(cue => shiftSrtTime(cue, shiftInSeconds));
       const newSrtContent = compileSrt(shiftedSrt);
       onSrtChange(newSrtContent);
-      toast({ title: "Success", description: `SRT time shifted by ${shift} seconds.` });
+      toast({ title: "Success", description: `SRT time shifted by ${shiftInMs} milliseconds.` });
     } catch (error) {
       toast({ variant: "destructive", title: "Error processing SRT", description: "Please check the SRT format." });
       console.error(error);
@@ -65,15 +68,14 @@ export function SrtAdjuster({ originalSrt, currentSrt, onSrtChange }: SrtAdjuste
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-3">
-            <Label htmlFor="time-shift" className="flex items-center"><Clock className="mr-2 h-4 w-4"/>Time Shift (seconds)</Label>
+            <Label htmlFor="time-shift" className="flex items-center"><Clock className="mr-2 h-4 w-4"/>Time Shift (milliseconds)</Label>
             <div className="flex items-center gap-2">
                 <Input
                     id="time-shift"
                     type="number"
-                    step="0.1"
                     value={timeShift}
                     onChange={(e) => setTimeShift(e.target.value)}
-                    placeholder="e.g., 1.5 or -2.0"
+                    placeholder="e.g., 500 or -200"
                 />
                 <Button type="button" onClick={handleTimeShift}>Apply</Button>
                 <Button type="button" variant="outline" onClick={handleReset}><Undo2 className="mr-2 h-4 w-4"/>Reset</Button>
