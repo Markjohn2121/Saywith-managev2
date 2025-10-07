@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Copy, QrCode } from "lucide-react";
@@ -91,7 +91,10 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
       
       const dataToSave: any = { ...values };
       dataToSave.template = manualTemplate || values.template;
-      dataToSave.audioUrl = '/default-audio.mp3';
+      
+      if (!audioFile) {
+        dataToSave.audioUrl = '/default-audio.mp3';
+      }
 
       const now = new Date().toISOString();
 
@@ -197,123 +200,123 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
   
   return (
     <>
-      <Card className="border-border">
-        <CardHeader>
-          <CardTitle>Create New Content</CardTitle>
-          <CardDescription>Fill out the form below to add a new entry to the database.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter content name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="space-y-2">
-                <FormField
-                  control={form.control}
-                  name="template"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Template</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a template" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {templates.map(template => (
-                            <SelectItem key={template.value} value={template.value}>
-                              {template.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormItem>
-                  <FormLabel>Manual Template (Optional)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Or enter a template value manually" 
-                      value={manualTemplate}
-                      onChange={(e) => setManualTemplate(e.target.value)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </div>
-
-
-              <div className="space-y-4">
-                  <FileUploader id="media-file" label="Media File (Image/Video)" accept="image/*,video/*" file={mediaFile} onFileSelect={setMediaFile} />
-                  <FileUploader id="audio-file" label="Audio File (MP3)" accept="audio/mpeg" file={audioFile} onFileSelect={setAudioFile} />
-                  <FileUploader id="srt-file" label="SRT/Text File" accept=".srt,.txt" file={srtFile} onFileSelect={setSrtFile} />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="enabled"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border border-border p-4">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>
-                          Enable Status
-                        </FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="mute"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border border-border p-4">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>
-                          Mute
-                        </FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <Card className="border-border">
+            <CardHeader>
+              <CardTitle>Create New Content</CardTitle>
+              <CardDescription>Fill out the form below to add a new entry to the database.</CardDescription>
+            </CardHeader>
+            <CardFooter className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm p-4 border-b">
               <Button type="submit" disabled={isLoading} className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Save Content
               </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            </CardFooter>
+            <CardContent className="p-6 pt-6 space-y-6">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter content name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="space-y-2">
+                  <FormField
+                    control={form.control}
+                    name="template"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Template</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a template" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {templates.map(template => (
+                              <SelectItem key={template.value} value={template.value}>
+                                {template.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormItem>
+                    <FormLabel>Manual Template (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Or enter a template value manually" 
+                        value={manualTemplate}
+                        onChange={(e) => setManualTemplate(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                </div>
+
+
+                <div className="space-y-4">
+                    <FileUploader id="media-file" label="Media File (Image/Video)" accept="image/*,video/*" file={mediaFile} onFileSelect={setMediaFile} />
+                    <FileUploader id="audio-file" label="Audio File (MP3)" accept="audio/mpeg" file={audioFile} onFileSelect={setAudioFile} />
+                    <FileUploader id="srt-file" label="SRT/Text File" accept=".srt,.txt" file={srtFile} onFileSelect={setSrtFile} />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="enabled"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border border-border p-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>
+                            Enable Status
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="mute"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border border-border p-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>
+                            Mute
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
       
       <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <AlertDialogContent>

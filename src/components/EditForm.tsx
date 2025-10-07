@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search } from "lucide-react";
 import { FileUploader } from "./FileUploader";
@@ -268,7 +268,14 @@ export function EditForm() {
 
         {loadedData && (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onUpdate)} className="space-y-6 animate-in fade-in-50">
+            <form onSubmit={form.handleSubmit(onUpdate)}>
+              <CardFooter className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm p-4 border-b -mx-6 -mt-6 mb-6">
+                <Button type="submit" disabled={isUpdating} className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
+                    {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Update Content
+                </Button>
+              </CardFooter>
+              <div className="space-y-6 animate-in fade-in-50">
                 <FormField
                   control={form.control}
                   name="name"
@@ -379,10 +386,7 @@ export function EditForm() {
                     )}
                   />
                 </div>
-                <Button type="submit" disabled={isUpdating} className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
-                    {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Update Content
-                </Button>
+              </div>
             </form>
           </Form>
         )}
