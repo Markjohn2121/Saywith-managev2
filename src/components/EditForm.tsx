@@ -269,13 +269,7 @@ export function EditForm() {
         {loadedData && (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onUpdate)}>
-              <CardFooter className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm p-4 border-b -mx-6 -mt-6 mb-6">
-                <Button type="submit" disabled={isUpdating} className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
-                    {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Update Content
-                </Button>
-              </CardFooter>
-              <div className="space-y-6 animate-in fade-in-50">
+              <div className="space-y-6 animate-in fade-in-50 pb-24">
                 <FormField
                   control={form.control}
                   name="name"
@@ -387,6 +381,12 @@ export function EditForm() {
                   />
                 </div>
               </div>
+              <div className="fixed bottom-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-t border-border p-4 md:relative md:p-0 md:bg-transparent md:border-0">
+                <Button type="submit" disabled={isUpdating} className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
+                    {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Update Content
+                </Button>
+              </div>
             </form>
           </Form>
         )}
@@ -394,5 +394,7 @@ export function EditForm() {
     </Card>
   );
 }
+
+    
 
     
