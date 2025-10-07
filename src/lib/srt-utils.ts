@@ -1,0 +1,67 @@
+
+export interface SrtCue {
+  index: number;
+  start: number;
+  end: number;
+  text: string;
+}
+
+const timeToSeconds = (time: string): number => {
+  const parts = time.split(':');
+  const secondsParts = parts[2].split(',');
+  const hours = parseInt(parts[0], 10);
+  const minutes = parseInt(parts[1], 10);
+  const seconds = parseInt(secondsParts[0], 10);
+  const milliseconds = parseInt(secondsParts[1], 10);
+  return hours * 3600 + minutes * 60 + seconds + milliseconds / 1000;
+};
+
+const secondsToTime = (totalSeconds: number): string => {
+  if (totalSeconds < 0) totalSeconds = 0;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+  const milliseconds = Math.round((totalSeconds - Math.floor(totalSeconds)) * 1000);
+
+  const pad = (num: number, size = 2) => num.toString().padStart(size, '0');
+
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)},${pad(milliseconds, 3)}`;
+};
+
+export const parseSrt = (srtContent: string): SrtCue[] => {
+  const cues: SrtCue[] = [];
+  const blocks = srtContent.trim().split(/\n\s*\n/);
+
+  for (const block of blocks) {
+    const lines = block.trim().split('\n');
+    if (lines.length >= 3) {
+      const index = parseInt(lines[0], 10);
+      const timeMatch = lines[1].match(/(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})/);
+      
+      if (timeMatch) {
+        const start = timeToSeconds(timeMatch[1]);
+        const end = timeToSeconds(timeMatch[2]);
+        const text = lines.slice(2).join('\n');
+        
+        cues.push({ index, start, end, text });
+      }
+    }
+  }
+  return cues;
+};
+
+export const compileSrt = (cues: SrtCue[]): string => {
+  return cues.map(cue => {
+    const start = secondsToTime(cue.start);
+    const end = secondsToTime(cue.end);
+    return `${cue.index}\n${start} --> ${end}\n${cue.text}`;
+  }).join('\n\n');
+};
+
+export const shiftSrtTime = (cue: SrtCue, shiftInSeconds: number): SrtCue => {
+    return {
+        ...cue,
+        start: cue.start + shiftInSeconds,
+        end: cue.end + shiftInSeconds,
+    };
+};

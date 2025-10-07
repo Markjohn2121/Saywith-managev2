@@ -20,6 +20,7 @@ import { FileUploader } from "./FileUploader";
 import { Textarea } from "@/components/ui/textarea";
 import templates from '@/lib/templates.json';
 import type { StorageProvider } from "@/app/page";
+import { SrtAdjuster } from "./SrtAdjuster";
 
 
 const formSchema = z.object({
@@ -335,6 +336,11 @@ export function EditForm() {
                       </FormControl>
                       <FormMessage />
                   </FormItem>
+                  <SrtAdjuster 
+                      originalSrt={loadedData.srtContent}
+                      currentSrt={srtContent}
+                      onSrtChange={setSrtContent}
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -384,5 +390,3 @@ export function EditForm() {
     </Card>
   );
 }
-
-    
