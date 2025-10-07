@@ -98,6 +98,23 @@ export function EditForm() {
     }
   }, [loadedData, form]);
 
+  const handleIdInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    try {
+      if (value.includes('/')) {
+        const parts = value.split('/');
+        const extractedId = parts.filter(Boolean).pop();
+        if (extractedId) {
+          setId(extractedId);
+          return;
+        }
+      }
+    } catch (error) {
+      // Ignore parsing errors and just set the raw value
+    }
+    setId(value);
+  };
+
   const handleFetchData = async () => {
     if (!id) {
       toast({ variant: "destructive", title: "Please enter an ID." });
@@ -233,7 +250,7 @@ export function EditForm() {
       </CardHeader>
       <CardContent>
         <div className="flex w-full items-center space-x-2 mb-6">
-          <Input type="text" placeholder="Enter Unique ID" value={id} onChange={(e) => setId(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleFetchData()} />
+          <Input type="text" placeholder="Enter Unique ID or URL" value={id} onChange={handleIdInputChange} onKeyDown={(e) => e.key === 'Enter' && handleFetchData()} />
           <Button type="button" onClick={handleFetchData} disabled={isFetching}>
             {isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
             Load
