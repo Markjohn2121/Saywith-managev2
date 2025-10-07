@@ -381,7 +381,7 @@ export function EditForm() {
                   />
                 </div>
               </div>
-              <div className="fixed bottom-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-t border-border p-4 md:relative md:p-0 md:bg-transparent md:border-0">
+              <div className="fixed bottom-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-t border-border p-4 md:static md:p-0 md:bg-transparent md:border-0 md:mt-4">
                 <Button type="submit" disabled={isUpdating} className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
                     {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     Update Content
@@ -394,7 +394,3 @@ export function EditForm() {
     </Card>
   );
 }
-
-    
-
-    
