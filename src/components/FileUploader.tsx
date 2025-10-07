@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRef, type ChangeEvent } from "react";
@@ -38,17 +39,17 @@ export function FileUploader({ onFileSelect, accept, label, file, className, id 
   return (
     <div className={cn("space-y-2", className)}>
       <Label htmlFor={id}>{label}</Label>
-      <div className="flex items-center gap-3">
-        <Button type="button" variant="outline" onClick={handleButtonClick}>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <Button type="button" variant="outline" onClick={handleButtonClick} className="shrink-0">
           <Upload className="mr-2 h-4 w-4" />
           Choose File
         </Button>
-        <div className="flex-1 p-2 border border-dashed border-border rounded-md min-h-[40px] flex items-center">
+        <div className="flex-1 p-2 border border-dashed border-border rounded-md min-h-[40px] flex items-center min-w-0">
             {file ? (
                 <div className="flex items-center gap-2 text-sm text-foreground w-full">
                     {getIcon(file.type)}
                     <span className="truncate flex-1">{file.name}</span>
-                    <span className="text-muted-foreground text-xs ml-auto whitespace-nowrap">
+                    <span className="text-muted-foreground text-xs ml-auto whitespace-nowrap pl-2">
                         {(file.size / 1024 / 1024).toFixed(2)} MB
                     </span>
                 </div>
