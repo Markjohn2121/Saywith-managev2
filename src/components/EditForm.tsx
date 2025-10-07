@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search } from "lucide-react";
@@ -249,6 +249,8 @@ export function EditForm() {
     }
   };
 
+  const isVideo = mediaFile?.type.startsWith("video/") || loadedData?.mediaUrl?.toLowerCase().includes('.mp4') || loadedData?.mediaUrl?.toLowerCase().includes('.mov');
+
   return (
     <Card className="border-border">
       <CardHeader>
@@ -362,23 +364,30 @@ export function EditForm() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="mute"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Mute</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
+                  {isVideo && (
+                    <FormField
+                      control={form.control}
+                      name="mute"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                           <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              Mute Video
+                            </FormLabel>
+                             <FormDescription>
+                                (use uploaded audio sound)
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
               </div>
               <div className="fixed bottom-0 left-0 right-0 z-10 bg-background/95 backdrop-blur-sm border-t border-border p-4 md:static md:p-0 md:bg-transparent md:border-0 md:mt-4">

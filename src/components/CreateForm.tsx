@@ -198,6 +198,8 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
     }
   };
   
+  const isVideo = mediaFile?.type.startsWith("video/");
+
   return (
     <>
       <Form {...form}>
@@ -287,25 +289,30 @@ export function CreateForm({ storageProvider }: { storageProvider: StorageProvid
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="mute"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border border-border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>
-                            Mute
-                          </FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
+                  {isVideo && (
+                    <FormField
+                      control={form.control}
+                      name="mute"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              Mute Video
+                            </FormLabel>
+                             <FormDescription>
+                                (use uploaded audio sound)
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
             </CardContent>
           </Card>
